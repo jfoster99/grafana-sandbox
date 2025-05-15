@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus
+  namespace: argocd
+  finalizers:
+    - resources.argoproj.io/applicationset-sync-wave
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts # Helm repo URL
+    targetRevision: 25.3.0 # Use a specific chart version.  Important to pin!
+    helm:
+      valueFiles:
+        - values.yaml # Optional: Path to your custom values.yaml
+    chart: prometheus # The name of the chart in the repo
+  destination:
+    server: https://kubernetes.default.svc #  Kubernetes cluster API server URL
+    namespace: observability # The namespace where Prometheus will be installed
+  syncPolicy:
+    automated:
+      prune: true # Delete resources no longer defined in Git
+      selfHeal: true # Revert changes made outside of Git
+    syncOptions:
+      - CreateNamespace=true # Create the namespace if it doesn't exist
